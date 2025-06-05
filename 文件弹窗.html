@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/xlsx/0.18.2/xlsx.full.min.js"></script>
+    <!-- <script src="/xlsx.mini.min.js"></script> -->
+    <style>
+        /* [data-theme="light"]  */
+        :root {
+            --gray-100: HSL(0, 0%, 95%);
+            --gray-200: HSL(0, 0%, 85%);
+            --gray-300: HSL(0, 0%, 75%);
+            --gray-400: HSL(0, 0%, 65%);
+            --gray-500: HSL(0, 0%, 55%);
+            --gray-600: HSL(0, 0%, 45%);
+            --gray-700: HSL(0, 0%, 35%);
+            --gray-800: HSL(0, 0%, 25%);
+            --gray-900: HSL(0, 0%, 15%);
+            --gray-1000: HSL(0, 0%, 5%);
+        }
+
+        :root {
+            --text-primary: var(--gray-900);
+            --text-secondary: var(--gray-600);
+            --text-disabled: var(--gray-400);
+
+            --border-default: var(--gray-200);
+            --border-hover: var(--gray-300);
+
+            --bg-default: var(--gray-100);
+            --bg-hover: var(--gray-200);
+            --bg-selected: var(--gray-300);
+        }
+
+        /* p {
+            margin-top: 100px;
+            font-size: 40px;
+            color: var(--text-secondary);
+        } */
+
+        .upload-mask {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .color-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            display: flex;
+            background-color: white;
+            border-radius: 5px;
+        }
+
+        .color-container div {
+            margin: 5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .color-container div .square {
+            width: 32px;
+            height: 32px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+        }
+
+        .color-container div .text {
+            font-size: 12px;
+        }
+
+        .upload-modal {
+            width: 400px;
+            background-color: white;
+            color: red;
+            color: var(--text-primary);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            user-select: none;
+        }
+
+        .upload-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .upload-header h3 {
+            margin: 0;
+            font-size: 20px;
+            line-height: 20px;
+        }
+
+        .upload-header span {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: block;
+            line-height: 16px;
+            font-size: 12px;
+        }
+
+        .upload-close {
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background-color: transparent;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .upload-close:hover {
+            background-color: var(--bg-hover);
+        }
+
+        .upload-area {
+            /* width: 400px; */
+            height: 70px;
+            margin: 15px 0 20px 0;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .upload-instruction {
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            border: dashed 2px var(--border-hover);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .upload-instruction:hover {
+            background-color: var(--bg-default);
+        }
+
+        .upload-file-info {
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            border: solid 1px var(--border-default);
+            border-radius: 8px;
+            /* cursor: pointer; */
+        }
+
+        .upload-file-info:hover {
+            background-color: var(--bg-default);
+        }
+
+
+        .upload-file-left,
+        .upload-file-close {
+            width: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .upload-file-left {
+            width: 60px;
+        }
+
+        .upload-file-icon {
+            height: 36px;
+            width: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgb(16, 163, 127);
+            border-radius: 8px;
+        }
+
+        .upload-file-text {
+            flex: 1;
+        }
+
+        .upload-delete-file {
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            color: var(--gray-1000);
+            background-color: transparent;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            visibility: hidden;
+        }
+
+        .upload-file-info:hover .upload-delete-file {
+            visibility: visible;
+        }
+
+        .upload-footer {
+            display: flex;
+            justify-content: end;
+            gap: 16px;
+        }
+
+        .upload-file-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .upload-footer button {
+            width: 90px;
+            height: 42px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .upload-footer button:nth-child(1) {
+            background-color: var(--bg-default);
+            color: var(--text-primary);
+            border: 1px solid var(--border-default);
+        }
+
+        .upload-footer button:nth-child(1):hover {
+            background-color: var(--bg-hover);
+        }
+
+        .upload-footer button:nth-child(2) {
+            background-color: var(--text-primary);
+            color: var(--bg-default);
+            border: none;
+        }
+
+        .upload-footer button:nth-child(2):hover {
+            background-color: var(--gray-700);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <p>网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容网页原本的内容
+    </p> -->
+    <div class="upload-mask">
+        <div class="upload-modal">
+            <div class="upload-header">
+                <div class="upload-title">
+                    <h3>金蝶自动录入程序</h3>
+                    <button class="upload-close">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 6 6 18" />
+                            <path d="m6 6 12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <span>@2025 Zhaobo</span>
+            </div>
+            <div class="upload-area">
+                <input type="file" id="uploadFileInput" accept=".xlsx, .xls" style="display: none">
+                <div class="upload-instruction" id="uploadClickArea">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 3v12" />
+                        <path d="m17 8-5-5-5 5" />
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    </svg>
+                    <span>点击浏览或将文件拖到此处</span>
+                </div>
+                <div class="upload-file-info" style="display: none">
+                    <div class="upload-file-left">
+                        <div class="upload-file-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="white" stroke-width="2"
+                                class="lucide lucide-sheet-icon lucide-sheet">
+                                <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                                <line x1="3" x2="21" y1="9" y2="9" />
+                                <line x1="3" x2="21" y1="15" y2="15" />
+                                <line x1="9" x2="9" y1="3" y2="21" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="upload-file-text">
+                        <span class="upload-filename">小鼠销售订单数据.xlsx</span>
+                        <span class="upload-filesize">12 KB</span>
+                    </div>
+                    <div class="upload-file-close">
+                        <button class="upload-delete-file">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M18 6 6 18" />
+                                <path d="m6 6 12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="upload-footer">
+                <button>取 消</button>
+                <button>录 入</button>
+            </div>
+        </div>
+    </div>
+    <!-- <textarea id="uploadHead" style="display: none;"></textarea>
+    <textarea id="uploadBody" style="display: none;"></textarea> -->
+    <script>
+
+        const fileInput = document.getElementById('uploadFileInput');
+        const clickArea = document.getElementById('uploadClickArea');
+        clickArea.addEventListener('click', (e) => {
+            fileInput.click();
+        });
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                handleFile(file);
+                showFileInfo(file);
+            }
+        });
+
+        const deleteFileButton = document.querySelector('.upload-delete-file');
+        deleteFileButton.addEventListener('click', (e) => {
+            e.stopPropagation(); // 阻止事件冒泡
+            fileInput.value = ''; // 清空文件输入
+
+            const fileInfo = document.querySelector('.upload-file-info');
+            fileInfo.style.display = 'none';
+            const instruction = document.querySelector('.upload-instruction');
+            instruction.style.display = 'flex';
+
+            document.getElementById('uploadHead').value = '';
+            document.getElementById('uploadBody').value = '';
+        });
+
+        const closeButton = document.querySelector('.upload-close');
+        closeButton.addEventListener('click', () => {
+            const uploadMask = document.querySelector('.upload-mask');
+            uploadMask.remove();
+        });
+
+        const cancelButton = document.querySelector('.upload-footer button:nth-child(1)');
+        cancelButton.addEventListener('click', () => {
+            const uploadMask = document.querySelector('.upload-mask');
+            uploadMask.remove();
+        });
+
+        const submitButton = document.querySelector('.upload-footer button:nth-child(2)');
+        submitButton.addEventListener('click', () => {
+            if (fileInput.value === '') {
+                alert('请先上传文件');
+                return;
+            }
+            const uploadMask = document.querySelector('.upload-mask');
+            uploadMask.remove();
+        });
+
+
+
+        function parseHeader(worksheet) {
+            const headRange = XLSX.utils.decode_range('B2:C8');
+            const headData = {};
+
+            for (let row = headRange.s.r; row <= headRange.e.r; row++) {
+                const keyCellRef = XLSX.utils.encode_cell({ c: headRange.s.c, r: row }); // B列
+                const valueCellRef = XLSX.utils.encode_cell({ c: headRange.s.c + 1, r: row }); // C列
+
+                const key = worksheet[keyCellRef]?.v;
+                const value = worksheet[valueCellRef]?.v;
+
+                if (key !== undefined) {
+                    headData[key] = value;
+                }
+            }
+            return headData;
+        }
+
+        function parseBody(worksheet) {
+            const allRows = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+            // console.log(JSON.stringify(allRows, null, 2));
+            let header = null;
+            let headerRowIndex = -1;
+
+            for (let i = 0; i < allRows.length; i++) {
+                const row = allRows[i].map(cell => String(cell).trim());
+                if (row.includes('序号') && row.includes('小鼠品系') && row.includes('数量')) {
+                    header = row;
+                    headerRowIndex = i;
+                    break;
+                }
+            }
+            if (!header) throw new Error('未找到标题行');
+
+            const data = [];
+            for (let i = headerRowIndex + 1; i < allRows.length; i++) {
+                const row = allRows[i];
+                const rowObj = {};
+                for (let j = 0; j < header.length; j++) {
+                    rowObj[header[j]] = row[j];
+                }
+
+                const strain = rowObj['小鼠品系'];
+                if (!strain || strain === '0') break;
+
+                data.push(rowObj);
+            }
+            return data;
+        }
+
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const worksheet = workbook.Sheets['金蝶输入'];
+
+                // 处理表头和表体
+                const headData = parseHeader(worksheet);
+                const rowData = parseBody(worksheet);
+
+                console.log('表头数据:', JSON.stringify(headData, null, 2));
+                console.log('表体数据:', JSON.stringify(rowData, null, 2));
+
+                let uploadHead = document.getElementById('uploadHead');
+                if (!uploadHead) {
+                    uploadHead = document.createElement('textarea');
+                    uploadHead.id = 'uploadHead';
+                    uploadHead.style.display = 'none';
+                    document.body.appendChild(uploadHead);
+                }
+                uploadHead.value = JSON.stringify(headData);
+
+                let uploadBody = document.getElementById('uploadBody');
+                if (!uploadBody) {
+                    uploadBody = document.createElement('textarea');
+                    uploadBody.id = 'uploadBody';
+                    uploadBody.style.display = 'none';
+                    document.body.appendChild(uploadBody);
+                }
+                uploadBody.value = JSON.stringify(rowData);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function showFileInfo(file) {
+            const instruction = document.querySelector('.upload-instruction');
+            instruction.style.display = 'none';
+
+            const fileInfo = document.querySelector('.upload-file-info');
+            fileInfo.style.display = 'flex';
+
+            const filenameSpan = document.querySelector('.upload-filename');
+            const filesizeSpan = document.querySelector('.upload-filesize');
+
+            filenameSpan.textContent = file.name;
+
+            let fileSize;
+            if (file.size >= 1024 * 1024) {
+                fileSize = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+            } else {
+                fileSize = (file.size / 1024).toFixed(1) + ' KB';
+            }
+            filesizeSpan.textContent = fileSize;
+        }
+    </script>
+
+</body>
+
+</html>
