@@ -443,21 +443,21 @@
 
                 let uploadHead = document.getElementById('uploadHead');
                 if (!uploadHead) {
-                    uploadHead = document.createElement('textarea');
+                    uploadHead = document.createElement('div');
                     uploadHead.id = 'uploadHead';
                     uploadHead.style.display = 'none';
                     document.body.appendChild(uploadHead);
                 }
-                uploadHead.value = JSON.stringify(headData);
+                uploadHead.textContent = JSON.stringify(headData);
 
                 let uploadBody = document.getElementById('uploadBody');
                 if (!uploadBody) {
-                    uploadBody = document.createElement('textarea');
+                    uploadBody = document.createElement('div');
                     uploadBody.id = 'uploadBody';
                     uploadBody.style.display = 'none';
                     document.body.appendChild(uploadBody);
                 }
-                uploadBody.value = JSON.stringify(rowData);
+                uploadBody.textContent = JSON.stringify(rowData);
             };
             reader.readAsArrayBuffer(file);
         }
