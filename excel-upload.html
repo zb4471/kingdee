@@ -378,7 +378,7 @@
 
 
         function parseHeader(worksheet) {
-            const headRange = XLSX.utils.decode_range('B2:C8');
+            const headRange = XLSX.utils.decode_range('B2:C9');
             const headData = {};
 
             for (let row = headRange.s.r; row <= headRange.e.r; row++) {
